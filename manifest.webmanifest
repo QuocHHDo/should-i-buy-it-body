@@ -1,0 +1,17 @@
+{
+  "name": "Should I Buy It? Body Care",
+  "short_name": "Body Care",
+  "description": "Check soap, body wash, shampoo, sunscreen, lotion and more against your skin. Fixed rules, not AI. Free, no account.",
+  "start_url": "./?source=app",
+  "scope": "./",
+  "id": "./",
+  "display": "standalone",
+  "background_color": "#f5f6f1",
+  "theme_color": "#2f5d78",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "categories": ["health", "lifestyle", "shopping"]
+}
