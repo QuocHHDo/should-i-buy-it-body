@@ -22,6 +22,15 @@ test("every built-in has an https source URL, a source name and a valid checked 
   }
 });
 
+test("brand-page products say so, and only sites that refuse automated checks are marked for checking by hand", () => {
+  for (const p of PRODUCTS) {
+    if (p.sourceType) assert.equal(p.sourceType, "brand", p.id);
+    if (p.autoCheck === false) assert.equal(p.sourceType, "brand", p.id + " (by-hand checks are for brand sites)");
+  }
+  assert.ok(PRODUCTS.filter(p => p.sourceType === "brand").length >= 5);
+  assert.ok(PRODUCTS.filter(p => p.autoCheck === false).length <= 2);
+});
+
 test("built-in barcodes are valid manufacturer codes and each belongs to one product", () => {
   const valid = c => { const d = c.split("").map(Number), check = d.pop(); const s = d.reverse().reduce((t, x, i) => t + x * (i % 2 === 0 ? 3 : 1), 0); return (10 - s % 10) % 10 === check; };
   const seen = new Set();

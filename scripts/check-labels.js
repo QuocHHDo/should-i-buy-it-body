@@ -22,8 +22,11 @@ function extract(html) {
   const blocks = decode(html.replace(/<\/?(p|div|li|br|h[1-6]|td|tr|section|ul)\b[^>]*>/gi, "\n").replace(/<[^>]+>/g, " "))
     .split("\n").map(s => s.replace(/\s+/g, " ").trim()).filter(Boolean);
   const grab = re => { const i = blocks.findIndex(b => re.test(b)); if (i < 0) return null; return blocks[i].replace(re, "").trim() || blocks[i + 1] || null; };
-  const act = grab(/^Active Ingredients?:\s*/i), inact = grab(/^Inactive Ingredients?:\s*/i);
+  const act = grab(/^Active Ingredients?\s*:\s*/i), inact = grab(/^Inactive Ingredients?\s*:\s*/i);
   if (act && inact) return "Active Ingredients: " + act.replace(/\.\s*$/, "") + ". Inactive Ingredients: " + inact;
+  // Brand pages (Vanicream, Native, La Roche-Posay): the first block that reads like a list, starting with water.
+  const list = blocks.find(b => /^(aqua|water|purified water)\b/i.test(b) && (b.match(/,|•/g) || []).length >= 4 && b.length < 3000);
+  if (list) return list;
   return null;
 }
 
@@ -49,10 +52,12 @@ async function fetchPage(url) {
 
 async function main() {
   const reportPath = process.argv.includes("--report") ? process.argv[process.argv.indexOf("--report") + 1] : null;
-  const changed = [], unreachable = [], unchanged = [];
+  const changed = [], unreachable = [], unchanged = [], byHand = [];
   for (const p of PRODUCTS) {
-    const r = await fetchPage(p.sourceUrl);
     const name = p.brand + " " + p.name;
+    // Sites that refuse automated requests: listed for a person to check, never fetched around the block.
+    if (p.autoCheck === false) { byHand.push(`- ${name}: [${p.source} page](${p.sourceUrl}) (stored list checked ${p.checked})`); continue; }
+    const r = await fetchPage(p.sourceUrl);
     if (!r.html) unreachable.push(`- ${name} ([${p.source}](${p.sourceUrl})): ${r.error || "HTTP " + r.status}`);
     else {
       const list = extract(r.html);
@@ -71,9 +76,10 @@ async function main() {
   const today = new Date().toISOString().slice(0, 10);
   const report = [
     `## Label check, ${today}`,
-    `${unchanged.length} of ${PRODUCTS.length} built-in lists match their source page.`,
+    `${unchanged.length} of ${PRODUCTS.length - byHand.length} automatically checked lists match their source page.`,
     changed.length ? `\n## ${changed.length} changed\nCopy the new list into \`js/products.js\` (and update \`checked\`), or remove the product if the listing is gone. Run \`node tests/run.js\` after.\n\n${changed.join("\n")}` : "",
     unreachable.length ? `\n## ${unreachable.length} couldn't be checked\nNot treated as changes. Retry from the Actions tab, or open the page yourself.\n\n${unreachable.join("\n")}` : "",
+    byHand.length ? `\n## Check by hand (${byHand.length})\nThese sites refuse automated requests. Open the page now and then and compare it with the stored list.\n\n${byHand.join("\n")}` : "",
   ].filter(Boolean).join("\n");
   console.log("\n" + report);
   if (reportPath) fs.writeFileSync(reportPath, report + "\n");

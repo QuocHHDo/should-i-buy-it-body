@@ -335,6 +335,9 @@
     ["lactose|2,3 butanediol|sodium polystyrene sulfonate|polyimide 1", "neutral", "film", "Helps the formula's texture or stability."],
     ["methylundecanal|aldehyde c 12 mna|undecanal|decanal|octanal", "scent", "fragrance", "A perfume ingredient: part of the product's scent."],
     ["chloramine t", "antibacterial", "", "An antiseptic. Can irritate with frequent use."],
+    ["ammonium polyacryloyldimethyl taurate|ammonium acryloyldimethyltaurate/beheneth 25 methacrylate crosspolymer", "neutral", "thickener", "A thickener that gives a light gel texture. Not a cleanser, despite the “taurate”."],
+    ["pentaerythrityl tetraethylhexanoate|pentaerythrityl tetraisostearate", "moisturizer", "emollient", "An emollient ester: makes skin feel soft and smooth."],
+    ["stearamide amp|stearamide mea|cocamide amp", "neutral", "foam", "A thickener and foam booster in washes."],
     ["miel", "moisturizer", "humectant animal", "Honey: a humectant. Made by bees, so not vegan."],
   ];
 

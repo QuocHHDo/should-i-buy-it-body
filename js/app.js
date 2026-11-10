@@ -140,7 +140,7 @@
     empty: "no ingredients were found in it",
   };
   function sourceLine(p) {
-    if (p.checked && p.sourceUrl) return `<b>✓ Label checked ${esc(monthYear(p.checked))}</b> · <a href="${esc(p.sourceUrl)}" target="_blank" rel="noopener">${esc(p.source)} listing</a> · formulas change, compare with your bottle.`;
+    if (p.checked && p.sourceUrl) return `<b>✓ Label checked ${esc(monthYear(p.checked))}</b> · <a href="${esc(p.sourceUrl)}" target="_blank" rel="noopener">${esc(p.source)} ${p.sourceType === "brand" ? "product page" : "listing"}</a> · formulas change, compare with your bottle.`;
     if (p.source === "Open Beauty Facts") return `From <a href="${esc(p.sourceUrl)}" target="_blank" rel="noopener">Open Beauty Facts</a> (community data) · compare with your bottle.`;
     return "From the ingredient list you pasted.";
   }

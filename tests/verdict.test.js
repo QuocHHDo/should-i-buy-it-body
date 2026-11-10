@@ -134,6 +134,15 @@ test("acne actives count only with acne-prone ticked", () => {
   assert.equal(pts(ev("Face wash", "Water, Sodium Cocoyl Isethionate, Glycerin, Benzoyl Peroxide, Sodium Chloride", { acne: true }), "acne-active"), 1);
 });
 
+test("an acne active counts only as the Drug Facts active or in the top 10; listed low it's a note", () => {
+  const low = V.evaluate(P.byId("cerave-cream-to-foam-cleanser"), { acne: true });    // salicylic acid near the end
+  assert.equal(pts(low, "acne-active"), 0);
+  assert.ok(hasNote(low, "acne-active-low"));
+  assert.equal(pts(V.evaluate(P.byId("clean-clear-deep-action-cleanser"), { acne: true }), "acne-active"), 1); // 6th, no Drug Facts split
+  assert.equal(pts(V.evaluate(P.byId("cerave-acne-foaming-cleanser"), { acne: true }), "acne-active"), 1);     // benzoyl peroxide active
+  assert.equal(pts(ev("Face wash", "Active Ingredients: Sulfur 3%. Inactive Ingredients: Water, Glycerin, Salicylic Acid, Sodium Cocoyl Isethionate", { acne: true }), "acne-active"), 1);
+});
+
 test("dandruff active counts only with dandruff ticked", () => {
   const hs = P.byId("head-shoulders-classic-clean");
   assert.equal(pts(V.evaluate(hs, {}), "dandruff-active"), 0);

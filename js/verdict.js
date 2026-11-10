@@ -197,11 +197,14 @@
     }
     const acids = S.filter(i => has(i.entry, "aha") && inTop(i, 6));
     if (acids.length && sens) add("strong-acid", -1, "Exfoliating acid high on the list (" + list(acids) + "): can sting sensitive skin.", acids);
-    const acne = S.filter(i => has(i.entry, "acne"));
+    // An acne active counts when it's the Drug Facts active, or in the top 10 of a list without Drug Facts sections.
+    // Lower down it's there in a small amount (often to adjust pH), too little to treat acne.
+    const acneAll = S.filter(i => has(i.entry, "acne"));
+    const acne = acneAll.filter(i => i.active || (!parsed.hasActives && inTop(i, 10)));
     if (acne.length) {
       if (profile.acne) add("acne-active", 1, "Acne active: " + list(acne) + ".", acne);
       else note("acne-active", "Has an acne active (" + list(acne) + "). It counts as a plus only if you tick acne-prone.", acne);
-    }
+    } else if (acneAll.length) note("acne-active-low", list(acneAll) + " is listed low, so it's likely too little to treat acne. No points.", acneAll);
     const filters = sun ? S.filter(i => i.entry.group === "uv-filter") : [];
     const mineral = filters.filter(i => has(i.entry, "mineral")), chemical = filters.filter(i => has(i.entry, "chemical"));
     if (filters.length && !chemical.length) {
