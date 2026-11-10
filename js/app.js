@@ -274,6 +274,7 @@
     $("dlgNote").textContent = !e ? "This ingredient isn't in the knowledge base yet, so it wasn't scored. Nothing is guessed about it."
       : (i.group === "neutral" && e.group === "uv-filter") ? "A white mineral. Outside a sunscreen it's used as a pigment, not a UV filter." : e.note;
     const more = [];
+    if (e && e.readAs) more.push("Read as " + e.readAs + ": the spelling on the label differs (often a typo or a photo misread).");
     more.push(i.active ? "Drug Facts active ingredient" + (i.pct != null ? " (" + i.pct + "%)" : "") + "." : i.may ? "Listed under “may contain” (shade-dependent); not scored." : "Number " + i.pos + " on the label" + (i.alt ? " (one of two alternatives)" : i.sub ? " (part of a group)" : "") + ".");
     if (r.complete) {
       const flags = r.flags.filter(f => f.items.includes(idx));

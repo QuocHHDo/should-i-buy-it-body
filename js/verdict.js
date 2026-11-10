@@ -235,6 +235,8 @@
     if (allergens.length) note("eu-allergens", "Lists " + uniq(allergens.map(i => i.entry.id)).length + " of the 26 EU-labeled fragrance allergens: " + names(allergens).join(", ") + ".", allergens);
     const may = items.filter(i => i.may);
     if (may.length) note("may-contain", "May contain: " + names(may).join(", ") + " (shade-dependent; not scored).", may);
+    const fixed = items.filter(i => i.entry && i.entry.readAs);
+    if (fixed.length) note("spelling", "Read with a spelling fix (check against your bottle): " + fixed.map(i => "“" + i.name + "” as " + i.entry.readAs).join("; ") + ".", fixed);
     if (parsed.unknown.length) note("unknown", parsed.unknown.length + " ingredient" + (parsed.unknown.length === 1 ? " isn't" : "s aren't") + " in the knowledge base yet, so " + (parsed.unknown.length === 1 ? "it wasn't" : "they weren't") + " scored: " + uniq(parsed.unknown).join(", ") + ".", items.filter(i => !i.entry));
 
     // ---- Avoid list ----

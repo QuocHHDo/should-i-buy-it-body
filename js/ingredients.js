@@ -17,7 +17,9 @@
   function key(s) {
     return String(s || "").toLowerCase()
       .normalize("NFKD").replace(/[̀-ͯ]/g, "")
-      .replace(/[®™©*†‡^°]/g, "")
+      .replace(/[®™©*†‡^°#!]/g, "")
+      .replace(/\bhci\b/g, "hcl")
+      .replace(/(\d),\s+(\d)/g, "$1,$2")
       .replace(/[‐-―−]/g, "-")
       .replace(/[’‘`]/g, "'")
       .replace(/\./g, "")
@@ -41,7 +43,7 @@
   // [aliases separated by |, group, tags separated by spaces, plain-English line]
   const ENTRIES = [
     // Cleansers: harsh
-    ["sodium lauryl sulfate|sls|sodium dodecyl sulfate", "cleanser", "harsh sulfate", "A strong detergent (SLS). Lathers well but strips skin oils; the most irritating common cleanser."],
+    ["sodium lauryl sulfate|sls|sodium dodecyl sulfate|sodium laurel sulfate","cleanser", "harsh sulfate", "A strong detergent (SLS). Lathers well but strips skin oils; the most irritating common cleanser."],
     ["ammonium lauryl sulfate|als", "cleanser", "harsh sulfate", "A strong sulfate detergent, close to SLS in how much it strips."],
     ["sodium coco sulfate|sodium coco-sulfate|sodium cocosulfate", "cleanser", "harsh sulfate", "Coconut-derived, but mostly SLS: a strong sulfate detergent."],
     ["tea lauryl sulfate|triethanolamine lauryl sulfate|potassium lauryl sulfate|mea lauryl sulfate", "cleanser", "harsh sulfate", "A lauryl sulfate detergent, similar to SLS."],
@@ -250,6 +252,90 @@
     ["rosa damascena flower water|rose water", "neutral", "extract", "Rose water: mostly scent."],
     ["oleth 3 phosphate|oleth 3", "neutral", "emulsifier", "An emulsifier."],
     ["peg 7 trimethylolpropane coconut ether", "neutral", "emulsifier", "A mild emulsifier and solubilizer."],
+
+    // ---- Added from a coverage check against 816 real Open Beauty Facts lists ----
+    // Perfume materials beyond the original EU 26 (named on labels more often since the EU widened its list)
+    ["tetramethyl acetyloctahydronaphthalenes|tetramethyl acetyloctahydronaphthalene|iso e super|hexamethylindanopyran|galaxolide|terpineol|alpha terpineol|pinene|pinenes|alpha pinene|beta pinene|acetyl cedrene|acetylcedrene|amyl salicylate|hexyl salicylate|cyclohexyl salicylate|geranyl acetate|citronellyl acetate|terpinyl acetate|neryl acetate|isobornyl acetate|isoeugenyl acetate|hexyl acetate|benzyl acetate|dimethyl phenethyl acetate|beta caryophyllene|caryophyllene|carvone|rose ketones|rose ketone|rose ketone 4|damascone|alpha damascone|beta damascone|anethole|terpinolene|benzaldehyde|methyl benzoate|trimethylbenzenepropanol|2 methyl 5 cyclohexylpentanol|dihydromyrcenol|ethylene brassylate|ethyl linalool|methyl dihydrojasmonate|hedione|camphene|myrcene|ocimene|eucalyptol|1,8 cineole|cineole|menthone|nerol|cedrol|sandalore|hexadecanolactone|ambroxan|ambrox|thymol|androstadienone", "scent", "fragrance", "A perfume ingredient: part of the product's scent. Like other fragrance chemicals, it can irritate or sensitize some people."],
+    ["menthyl lactate|ethyl menthane carboxamide|menthoxypropanediol|menthone glycerin acetal|methyl diisopropyl propionamide", "scent", "fragrance", "A cooling agent, like menthol. Can sting sensitive skin."],
+    // Salts, pH adjusters, solvents
+    ["magnesium nitrate|magnesium chloride", "neutral", "salt", "A salt. Often present to stabilize the preservatives MIT/MCI."],
+    ["calcium chloride|potassium chloride|ammonium chloride|magnesium hydroxide|zinc sulfate heptahydrate|calcium sulfate|sel marin", "neutral", "salt", "A mineral salt used to thicken or balance the formula."],
+    ["acetic acid|phosphoric acid|fumaric acid|hydrochloric acid|formic acid|sodium acetate|potassium bicarbonate|sodium carbonate|sodium borate|acetum|apple cider vinegar|ethanolamine|tetrasodium pyrophosphate|acide citrique|succinic acid", "neutral", "ph", "Adjusts pH."],
+    ["triethylene glycol|diethylene glycol|propylene carbonate|isopentane|solketal|dipropylene glycol dibenzoate|ethoxydiglycol|dimethyl isosorbide|benzyl glycol", "neutral", "solvent", "A solvent that helps other ingredients dissolve or spread."],
+    // Humectants and amino acids
+    ["methyl gluceth 20|methyl gluceth 10|polyglycerin 10|polyglycerin 3|polyglycerin|erythritol|mannitol|biosaccharide gum 1|anhydroxylitol|xylitylglucoside|hydroxyproline|glucosamine|sodium pyruvate|lactobionic acid|hydrolyzed glycosaminoglycans|glyceryl polyacrylate|acetyl glucosamine|sodium hyaluronate (hyaluronic acid)", "moisturizer", "humectant", "A humectant: helps the skin hold water."],
+    ["phenylalanine|isoleucine|tyrosine|methionine|taurine|magnesium aspartate|cysteine|tryptophan|asparagine|glutamine|citrulline|ornithine|wheat amino acids|soy amino acids|oat amino acids|rice amino acids|amino acids", "moisturizer", "humectant", "An amino acid, part of skin's natural moisturizing factor."],
+    // Animal-derived
+    ["keratin amino acids|cocoyl hydrolyzed keratin|cocodimonium hydroxypropyl hydrolyzed keratin|hydrolyzed elastin|elastin|milk protein", "conditioning", "conditioning animal", "An animal-derived protein that coats hair and skin. Not vegan."],
+    ["goat milk|caprae lac|lac|milk|goat milk powder|lac caprae", "moisturizer", "emollient animal", "Milk: softening and lightly moisturizing. Not vegan."],
+    ["goat fat|tallow|adeps bovis", "moisturizer", "emollient occlusive animal", "Animal fat used as an emollient. Not vegan."],
+    ["hydrolyzed pearl|pearl powder", "neutral", "animal", "Powdered pearl, for shimmer. From oysters, so not vegan."],
+    ["snail secretion filtrate|snail mucin", "moisturizer", "humectant animal", "Snail mucin: a humectant. Not vegan."],
+    ["squalene", "moisturizer", "emollient animal-may", "An emollient oil. Usually from olives now, but it can come from shark liver."],
+    // Emollients, waxes, barrier lipids
+    ["butylene glycol dicaprylate/dicaprate|propylene glycol dicaprylate/dicaprate|propanediol dicaprylate|propanediol dicaprylate/caprate|neopentyl glycol dicaprate|isoamyl laurate|hexyl laurate|butyloctanol|hexyldecanol|lauryl lactyl lactate|cetyl lactate|myristyl lactate|oleyl erucate|distearyl ether|heptyl undecylenate|dibutyl adipate|diisopropyl sebacate|cocoglycerides|coco glycerides|oleic/linoleic/linolenic polyglycerides|pca glyceryl oleate|lauryl pca|c15 23 alkane|c30 45 olefin|diethylhexyl 2,6 naphthalate|ethylhexyl cocoate|caprylyl caprylate/caprate|isopropyl isostearate|isopropyl lauroyl sarcosinate|phenethyl benzoate|caprylic/capric triglycerides|shea butter ethyl esters|isodecyl isononanoate|c12 13 alkyl lactate", "moisturizer", "emollient", "An emollient: makes skin feel soft and smooth."],
+    ["cera microcristallina|copernicia cerifera cera|cera carnauba|hydrogenated microcrystalline wax|synthetic wax|cera microcristallina/microcrystalline wax", "moisturizer", "emollient occlusive", "A wax that thickens and seals in moisture."],
+    ["phospholipids|sphingolipids|glycosphingolipids|beta sitosterol|phytosterols|2 oleamido 1,3 octadecanediol|hydroxypropyl bispalmitamide mea|cetyl pg hydroxyethyl palmitamide|cholesteryl macadamiate", "moisturizer", "barrier", "A lipid like those in the skin barrier; helps it hold moisture."],
+    // Emulsifiers, thickeners, films
+    ["hydrogenated palm glycerides citrate|hydrogenated palm glycerides|glyceryl stearate citrate|hydrogenated vegetable glycerides citrate|glycereth 2 cocoate|pentaerythrityl distearate|trihydroxystearin|glyceryl monostearate|sucrose cocoate|sucrose laurate|sucrose palmitate|sorbitan caprylate|cetearyl wheat straw glycosides|caprylyl/capryl wheat bran/straw glycosides|disteardimonium bentonite|stearate citrate", "neutral", "emulsifier", "An emulsifier or thickener that keeps the formula smooth and stable."],
+    ["maltodextrin|pullulan|algin|dextrin|dextrin palmitate|succinoglycan|polyvinyl alcohol|polymethyl methacrylate|trimethylsiloxysilicate|poly c10 30 alkyl acrylate|polyester 7|polyether 1|polyamide 5|nylon 66|ammonium polyacrylate|sodium polymethacrylate|polysilicone 29|polysilicone 11|sodium starch octenylsuccinate|cellulose acetate|aluminum stearates|vp/eicosene copolymer", "neutral", "film", "A polymer, starch or sugar that thickens, binds or forms a light film."],
+    ["inulin|fructan|fructooligosaccharides|alpha glucan oligosaccharide|beta glucan|oat beta glucan|glucan", "neutral", "soothing", "A plant sugar (prebiotic or soothing). Mostly harmless."],
+    ["calcium sodium borosilicate|calcium aluminum borosilicate|synthetic fluorphlogopite|illite|charcoal powder|charcoal|activated charcoal|zinc neodecanoate|sodium fluoride|hydroxyapatite|silver citrate", "neutral", "mineral", "A mineral used for texture, shimmer, absorbing oil, odor control or (in toothpaste) teeth."],
+    ["caramel|caramel color", "neutral", "pigment", "Caramel color: food coloring made from heated sugar. Not a synthetic dye."],
+    ["sodium saccharin|saccharin|potassium acesulfame|acesulfame potassium|sucralose|steviol glycosides|denatonium benzoate", "neutral", "flavor", "A sweetener or bitterant, common in lip products and toothpaste."],
+    // Vitamins, antioxidants, actives used in small amounts
+    ["sodium ascorbyl phosphate|ascorbic acid|magnesium ascorbyl phosphate|ascorbyl glucoside|3 o ethyl ascorbic acid|ethyl ascorbic acid|tetrahexyldecyl ascorbate|ascorbyl tetraisopalmitate|3 laurylglyceryl ascorbate|vitamin c|vitamin c ester", "neutral", "antioxidant", "Vitamin C, or a form of it: an antioxidant that can brighten skin."],
+    ["retinyl palmitate|retinyl acetate|retinol|retinal|retinaldehyde|hydroxypinacolone retinoate|vitamin a", "neutral", "retinoid", "A form of vitamin A. Stronger forms (retinol, retinal) can irritate sensitive skin."],
+    ["biotin|pyridoxine|vitamin b6|cyanocobalamin|vitamin b12|thiamine|calcium pantothenate|pantothenic acid|riboflavin|folic acid|phytonadione|phytodione|vitamin k1", "neutral", "vitamin", "A vitamin, used in small amounts. Harmless."],
+    ["ubiquinone|coenzyme q10|beta carotene|glutathione|ergothioneine|ferulic acid|resveratrol|quercetin|apigenin|bioflavonoids|oryzanol|tocotrienols|astaxanthin|lycopene|idebenone|carnosine|thiotaurine|pentaerythrityl tetra di t butyl hydroxyhydrocinnamate|octadecyl di t butyl 4 hydroxyhydrocinnamate", "neutral", "antioxidant", "An antioxidant: protects skin or the formula from oxidation."],
+    ["sodium metabisulfite|sodium sulfite", "neutral", "antioxidant", "A sulfite antioxidant. Rarely a problem on skin, but sulfite-sensitive people may want to know."],
+    ["caffeine|kojic acid|alpha arbutin|arbutin|dimethylaminoethanol|dmae|4 t butylcyclohexanol|oleanolic acid|asiaticoside|madecassic acid|asiatic acid|hydroxydecyl ubiquinone", "neutral", "skin-care", "A skin-care ingredient used in small amounts."],
+    ["dihydroxyacetone|erythrulose", "neutral", "skin-care", "A self-tanner: browns the top layer of skin for a few days."],
+    ["capryloyl salicylic acid", "active", "exfoliant", "A gentle oil-soluble cousin of salicylic acid (LHA). Exfoliates; not an FDA acne active."],
+    // Cleansers and foam boosters
+    ["laureth sulfate|tipa laureth sulfate|mipa laureth sulfate", "cleanser", "moderate sulfate", "A laureth sulfate detergent, similar to SLES."],
+    ["sodium laureth 5 carboxylate|sodium laureth 4 carboxylate|sodium laureth 6 carboxylate|laureth 5 carboxylic acid|sodium lauryl glycol carboxylate|lauroyl/myristoyl methyl glucamide|lauroyl methyl glucamide|capryloyl/caproyl methyl glucamide|cocoyl methyl glucamide|sodium methyltaurate|sodium sesamphoacetate|disodium cocamphodiacetate|sodium cocoyl hydrolyzed wheat protein|potassium cocoyl hydrolyzed oat protein|sodium cocoyl apple amino acids|sodium lauroyl oat amino acids|slsa|poloxamine 1307|sodium cocoyl alaninate|myristoyl methylalanine", "cleanser", "gentle", "A mild cleanser."],
+    ["cocamide methyl mea|lauramide mipa|peg 4 rapeseedamide", "neutral", "foam", "A foam booster and thickener."],
+    // Sunscreen filters used outside the US, and formula photostabilizers
+    ["diethylhexyl butamido triazone|iscotrizinol", "uv-filter", "chemical", "A chemical UVB filter used in Europe (not approved in the US)."],
+    ["methylene bis benzotriazolyl tetramethylbutylphenol|tinosorb m", "uv-filter", "chemical", "Tinosorb M: a broad-spectrum UV filter used outside the US. Rarely irritating."],
+    ["tris biphenyl triazine|phenylene bis diphenyltriazine|terephthalylidene dicamphor sulfonic acid|disodium phenyl dibenzimidazole tetrasulfonate|bisdisulizole disodium|polysilicone 15|isoamyl p methoxycinnamate|amiloxate|4 methylbenzylidene camphor|enzacamene|ethylhexyl dimethyl paba|sodium phenylbenzimidazole sulfonate|octyl salicylate|benzophenone 5", "uv-filter", "chemical", "A chemical UV filter (several are approved in Europe but not in the US)."],
+    ["benzotriazolyl dodecyl p cresol|diethylhexyl syringylidenemalonate", "neutral", "photostabilizer", "Protects the formula (or other UV filters) from light. Not counted as a sunscreen filter."],
+    // Antiseptics and more preservatives
+    ["octenidine|octenidine dihydrochloride|cetylpyridinium chloride|chlorhexidine|chlorhexidine digluconate", "antibacterial", "", "An antiseptic that kills bacteria. Not needed for everyday washing; can irritate with frequent use."],
+    ["5 bromo 5 nitro 1,3 dioxane|bronidox", "preservative", "formaldehyde", "A formaldehyde-releasing preservative (Bronidox)."],
+    ["polyaminopropyl biguanide|methylheptylglycerin|decylene glycol|phenylpropanol|ethyl lauroyl arginate|lauric arginate|o cymen 5 ol|isopropyl methylphenol|undecylenic acid|tropolone", "preservative", "normal", "A preservative or preservative booster."],
+    // Water, French names
+    ["thermal spring water|avene thermal spring water|thermal water|spring water|eau thermale|sea water|maris aqua", "neutral", "solvent", "Water (spring, thermal or sea water): the base of the formula."],
+    ["alcool|alcool denat|alcool etilico", "drying-alcohol", "", "Drying alcohol (as labeled in French or Italian). High up a leave-on list it can dry and sting."],
+    ["acide lactique", "active", "aha exfoliant", "Lactic acid (AHA), as labeled in French."],
+    ["cetostearyl alcohol", "moisturizer", "emollient fatty-alcohol", "Another name for cetearyl alcohol: a waxy fatty alcohol that softens. Not drying."],
+    ["triisostearin|neopentyl glycol diethylhexanoate|pentaerythrityl tetraisostearate|diethylhexyl carbonate|bis diglyceryl polyacyladipate 2|diisostearyl malate|octyldodecyl stearoyl stearate|hydrogenated ethylhexyl olivate|coconut alkanes|c13 15 alkane|helianthus annuus seed cera|neopentyl glycol dicaprylate/dicaprate|hydrogenated olive oil unsaponifiables|olive oil unsaponifiables", "moisturizer", "emollient", "An emollient: makes skin feel soft and smooth."],
+    ["diglycerin|maltitol|hydroxypropyl tetrahydropyrantriol|pro xylane", "moisturizer", "humectant", "A humectant: helps the skin hold water."],
+    ["soluble collagen", "moisturizer", "humectant animal", "Collagen in solution: a humectant film on the skin (it doesn't add collagen to skin). Not vegan."],
+    ["sine adipe lac|lac powder|skim milk", "moisturizer", "emollient animal", "Milk (or skim milk): softening. Not vegan."],
+    ["c12 13 alketh 9|c20 22 alkyl phosphate|inulin lauryl carbamate|sodium caproyl/lauroyl lactylate|sodium caproyl lactylate", "neutral", "emulsifier", "An emulsifier that keeps oil and water mixed."],
+    ["triacontanyl pvp|hydrogenated glyceryl abietate|magnesium myristate", "neutral", "film", "Helps the formula stay put, spread or feel smooth."],
+    ["diatomaceous earth|perlite|boron nitride|calcium silicate|kaolin clay|magnesium silicate|aluminum silicate", "neutral", "mineral", "A mineral powder that absorbs oil and gives texture."],
+    ["sodium formate|sodium glycolate|aminomethyl propanediol", "neutral", "ph", "Adjusts or buffers pH."],
+    ["t butyl alcohol|tert butyl alcohol", "neutral", "solvent", "A denaturant added in tiny amounts. Not a drying alcohol at that level."],
+    ["chlorophyllin copper complex|sodium copper chlorophyllin", "dye", "", "A green color made from chlorophyll."],
+    ["creatine|1 methylhydantoin 2 imide|creatinine|hesperidin methyl chalcone|silanetriol|protease|papain|bromelain|lactobacillus lysate|lactobacillus ferment|bifida ferment lysate", "neutral", "skin-care", "A skin-care ingredient used in small amounts."],
+    ["escin|aescin", "neutral", "soothing", "A soothing plant compound (from horse chestnut)."],
+    ["azelaic acid", "active", "exfoliant", "Azelaic acid: calms redness and helps with blemishes. Can tingle at first."],
+    ["methyl salicylate", "scent", "fragrance", "Wintergreen oil's main compound: minty scent and a warming feel. Can irritate."],
+    ["alpha terpinene|gamma terpinene|terpinene", "scent", "fragrance", "A perfume ingredient: part of the product's scent."],
+    ["sodium methyl 2 sulfolaurate|disodium 2 sulfolaurate", "cleanser", "gentle", "A mild cleanser (a sulfolaurate, not a sulfate)."],
+    ["lauroyl sarcosine|sodium laureth 11 carboxylate|lauroyl methylalanine|sodium lauroyl methylaminopropionate|disodium tetrapropenyl succinate", "cleanser", "gentle", "A mild cleanser."],
+    ["soyamide dea|palm kernelamide dea", "neutral", "dea foam", "A DEA foam booster. Listed as a possible carcinogen in California; little exposure from a rinse-off."],
+    ["1 hexadecanol|hexadecanol|coconut alcohol|1 octadecanol", "moisturizer", "emollient fatty-alcohol", "A fatty alcohol: waxy and softening, not drying."],
+    ["c18 38 alkyl hydroxystearoyl stearate|castoryl maleate|palmitoyl myristyl serinate|pca ethyl cocoyl arginate", "moisturizer", "emollient", "An emollient: makes skin feel soft and smooth."],
+    ["isostearoyl hydrolyzed silk|sodium lauroyl hydrolyzed silk|sericin|potassium cocoyl hydrolyzed collagen|albumen|egg white", "conditioning", "conditioning animal", "An animal-derived protein (silk, collagen or egg). Not vegan."],
+    ["dihydroxypropyl arginine hcl|acetyl methionine|methylsilanol mannuronate|pg propyl methylsilanediol|persimmon tannin|cholecalciferol|vitamin d3|calcium lactate", "neutral", "skin-care", "A skin-care ingredient used in small amounts."],
+    ["lactose|2,3 butanediol|sodium polystyrene sulfonate|polyimide 1", "neutral", "film", "Helps the formula's texture or stability."],
+    ["methylundecanal|aldehyde c 12 mna|undecanal|decanal|octanal", "scent", "fragrance", "A perfume ingredient: part of the product's scent."],
+    ["chloramine t", "antibacterial", "", "An antiseptic. Can irritate with frequent use."],
+    ["miel", "moisturizer", "humectant animal", "Honey: a humectant. Made by bees, so not vegan."],
   ];
 
   // Built from ENTRIES: one shared entry object per row, findable by any alias.
@@ -275,7 +361,13 @@
   const PATTERNS = [
     P(/\b(co|cross)polymer\b|crosspolymer|copolymer/, "neutral", "polymer", "A polymer that thickens, forms a film or gives a smooth feel."),
     P(/^polyquaternium \d+/, "conditioning", "conditioning", "A conditioning polymer that reduces tangles and static."),
-    P(/\b(peg|ppg)\b|^(polysorbate|ceteareth|steareth|laureth|oleth|ceteth|isoceteth|beheneth|trideceth|isosteareth|nonoxynol|poloxamer)\s?\d|\bpareth\s?\d/, "neutral", "emulsifier", "An emulsifier or solubilizer that keeps oil and water mixed."),
+    P(/hyaluron/, "moisturizer", "humectant", "A form of hyaluronic acid: holds water in the skin's surface."),
+    P(/peptide/, "neutral", "skin-care", "A peptide: a small protein fragment used in anti-aging products. Generally well tolerated."),
+    P(/(trimonium|dimonium) (chloride|methosulfate|bromide|phosphate)|hydroxypropyltrimonium|amidopropyl (dimethylamine|diethylamine)$|^silicone quaternium \d+/, "conditioning", "conditioning", "A conditioning agent: clings to hair (or skin) to soften and detangle."),
+    P(/\bresinoid\b/, "scent", "fragrance", "A perfume resin: part of the product's scent."),
+    P(/^(basic|acid|hc|disperse|direct) (blue|red|yellow|green|orange|violet|brown|black) \d+$/, "dye", "", "A hair or cosmetic dye. Adds color only; an occasional irritant."),
+    P(/\b(peg|ppg)\b|^(polysorbate|ceteareth|steareth|laureth|oleth|ceteth|isoceteth|beheneth|trideceth|isosteareth|undeceth|coceth|deceth|nonoxynol|poloxamer)\s?\d|\bpareth\s?\d/, "neutral", "emulsifier", "An emulsifier or solubilizer that keeps oil and water mixed."),
+    P(/^poly(ester|ether|amide|silicone|vinyl|methyl methacrylate|urethane)\b|^nylon \d+$/, "neutral", "film", "A polymer that forms a light film or gives a smooth feel."),
     P(/^ceramide\b|\bceramide (np|ap|eop|ns|eos|as|1|2|3|6 ii)\b/, "moisturizer", "barrier", "A ceramide: one of the lipids the skin barrier is built from. Helps repair dry, damaged skin."),
     P(/\bsaponified\b/, "soap", "", "Oils saponified (made into soap) with lye: true soap."),
     P(/essential oil/, "scent", "essential-oil","A plant essential oil: natural scent, but can irritate sensitive skin."),
@@ -283,18 +375,19 @@
     P(/\boil\b/, "moisturizer", "emollient", "A plant oil: softens skin."),
     P(/\bbutter\b/, "moisturizer", "emollient occlusive", "A plant butter: softens and seals in moisture."),
     P(/\bwax\b/, "moisturizer", "emollient occlusive", "A wax: thickens and seals in moisture."),
-    P(/\b(extract|juice|filtrate|ferment|leaf water|flower water|fruit water|hydrosol|leaf powder|root powder|seed powder|callus culture)\b/, "neutral", "extract", "A plant extract, usually in small amounts. Mostly harmless; any plant can irritate a few people."),
+    P(/\b(extract|juice|filtrate|ferment|leaf water|flower water|fruit water|rice water|hydrosol|leaf powder|root powder|seed powder|callus culture|cell culture)\b/,"neutral", "extract", "A plant extract, usually in small amounts. Mostly harmless; any plant can irritate a few people."),
     P(/\bsulfosuccinate\b|\bsulfoacetate\b/, "cleanser", "gentle", "A mild cleanser. Despite the name, not a sulfate."),
-    P(/\bisethionate\b|\bglucoside\b|\bsultaine\b|\bbetaine\b|\bsarcosinate\b|\btaurate\b|\bglutamate\b|\bglycinate\b|\bampho(di)?acetate\b|\bamphopropionate\b|\bamine oxide\b|\bglucose carboxylate\b/, "cleanser", "gentle", "A mild synthetic cleanser."),
+    P(/\bisethionate\b|\bglucoside\b|\bsultaine\b|\bbetaine\b|\bsarcosinate\b|\btaurate\b|\bglutamate\b|\bglycinate\b|ampho(di)?acetate\b|amphopropionate\b|\bamine oxide\b|\bglucose carboxylate\b|\bmethyl glucamide\b/,"cleanser", "gentle", "A mild synthetic cleanser."),
     P(/^(sodium|ammonium|tea|potassium|mea) lauryl sulfate$/, "cleanser", "harsh sulfate", "A lauryl sulfate: a strong, stripping detergent."),
     P({ test: k => /^(sodium|ammonium|tea|magnesium|potassium|mea|mipa|disodium) \S.* sulfate$/.test(k) && !/(metho|etho)sulfate$/.test(k) }, "cleanser", "moderate sulfate", "A sulfate detergent: lathers well, can strip dry skin."),
     P(/\bolefin sulfonate\b|\bbenzenesulfonate\b|\bparaffin sulfonate\b/, "cleanser", "moderate", "A strong synthetic detergent (not a sulfate)."),
     P(/^(sodium|potassium) (tallowate|lardate|beefate)$/, "soap", "animal", "Soap made from animal fat."),
-    P(/^(sodium|potassium) (\w+ )?(palmate|kernelate|cocoate|olivate|oleate|stearate|laurate|myristate|palmitate|castorate|sunflowerate|butterate|babassuate|ricinoleate|hempseedate|soyate|canolate|rapeseedate|avocadoate|almondate|jojobate|grapeseedate|safflowerate|cottonseedate|macadamiate|ricebranate|arganate|behenate)$/, "soap", "","True soap: oil reacted with lye. Alkaline, so it can dry skin."),
+    P(/^(sodium|potassium) (\w+ )?\w*(palmate|kernelate|cocoate|olivate|oleate|stearate|laurate|myristate|palmitate|castorate|sunflowerate|butterate|babassuate|ricinoleate|hempseedate|soyate|canolate|rapeseedate|avocadoate|almondate|jojobate|grapeseedate|safflowerate|cottonseedate|macadamiate|ricebranate|arganate|behenate|seedate|murumuruate|branate|kernelate)$/, "soap","","True soap: oil reacted with lye. Alkaline, so it can dry skin."),
     P(/^sd alcohol\b/, "drying-alcohol", "", "Denatured alcohol: drying high up a leave-on list."),
     P(/^(cetyl|stearyl|cetearyl|behenyl|myristyl|arachidyl|lauryl|oleyl|isostearyl|c\d+ \d+) alcohols?$/, "moisturizer", "emollient fatty-alcohol", "A fatty alcohol: waxy and softening, not drying."),
-    P(/^(stearic|palmitic|lauric|myristic|oleic|linoleic|linolenic|behenic|arachidic|capric|caprylic|isostearic) acid$/, "moisturizer", "emollient fatty-acid", "A fatty acid, like those in skin's own oils."),
-    P({ test: k => /^(isopropyl|ethylhexyl|octyldodecyl|cetyl|cetearyl|isocetyl|isononyl|isodecyl|isostearyl|decyl|myristyl|tridecyl|diisopropyl|dicaprylyl|propylheptyl|butyloctyl|hexyldecyl|c\d+ \d+ alkyl|coco) \S+(ate|anoate)$/.test(k) }, "moisturizer", "emollient", "An emollient ester: softens and smooths skin."),
+    P(/^(stearic|palmitic|lauric|myristic|oleic|linoleic|linolenic|behenic|arachidic|capric|caprylic|isostearic|palm|coconut|palm kernel) acid$/, "moisturizer", "emollient fatty-acid", "A fatty acid, like those in skin's own oils."),
+    // Fatty esters only: acetates, salicylates and cinnamates are often perfume or UV filters, so they're left out on purpose.
+    P(/^(isopropyl|ethylhexyl|octyldodecyl|cetyl|cetearyl|isocetyl|isononyl|isodecyl|isostearyl|decyl|myristyl|tridecyl|diisopropyl|dicaprylyl|propylheptyl|butyloctyl|hexyldecyl|hexyl|isoamyl|heptyl|oleyl|lauryl|stearyl|behenyl|octyl|isooctyl|isobutyl|c\d+ \d+ alkyl|coco|(butylene|propylene|neopentyl) glycol|propanediol) (laurate|myristate|palmitate|stearate|isostearate|oleate|behenate|erucate|caprylate|caprate|cocoate|neopentanoate|isononanoate|ethylhexanoate|heptanoate|undecylenate|lactate|adipate|sebacate|succinate|malate|citrate|carbonate|benzoate|dicaprylate|dicaprate|linoleate|ricinoleate)$/, "moisturizer", "emollient", "An emollient ester: softens and smooths skin."),
     P(/(methicone|siloxane|dimethiconol|silsesquioxane)$/, "moisturizer", "emollient conditioning", "A silicone that smooths and slows water loss."),
     P(/^quaternium \d+$/, "conditioning", "conditioning", "A conditioning agent."),
     P(/^hydrolyzed \w+ protein$/, "conditioning", "conditioning", "A broken-down protein that coats and strengthens hair."),
@@ -304,14 +397,57 @@
     P(/^(ext )?(fd&c|d&c)\b|^(ext )?(blue|red|yellow|green|orange|violet|brown) (no )?\d+( lake)?$/, "dye", "", "A synthetic color. Adds nothing for skin; an occasional irritant."),
     P(/(edta|etidronate|disuccinate|phytate|gluconate|pentetate)$/, "neutral", "chelator", "A chelator that keeps the formula stable in hard water."),
     P(/\bgum$|cellulose$|^carbomer|starch\b/, "neutral", "thickener", "A thickener."),
-    P(/^sorbitan \w+$|^polyglyceryl \d+ \w+$|^glyceryl \w+$/, "neutral", "emulsifier", "An emulsifier."),
+    P(/^sorbitan \w+$|^polyglyceryl \d+ \w+( \w+)*$|^glyceryl \w+$|glycerides citrate$/, "neutral", "emulsifier", "An emulsifier."),
+    P(/\biron oxides?\b/, "neutral", "pigment", "A mineral pigment for color. Not a synthetic dye."),
   ];
+  // Words that mark an animal source (for the vegan flag) on names matched by a pattern.
+  const ANIMAL = /\b(keratin|collagen|elastin|silk|milk|lac|caprae|goat|tallow|lard|honey|lanolin|placenta|snail|pearl|shark|cochineal|carmine|beeswax)\b/;
 
   /** @returns {any} */
   function patternEntry(k, display) {
     for (const p of PATTERNS) {
       const hit = typeof p.re.test === "function" ? p.re.test(k) : false;
-      if (hit) return { id: "p:" + slug(k), name: display, group: p.group, tags: p.tags, note: p.note, pattern: true };
+      if (hit) {
+        const tags = ANIMAL.test(k) && !/\b(synthetic|vegan|vegetable|phyto)\b/.test(k) && p.tags.indexOf("animal") < 0 ? p.tags.concat("animal") : p.tags;
+        return { id: "p:" + slug(k), name: display, group: p.group, tags, note: p.note, pattern: true };
+      }
+    }
+    return null;
+  }
+
+  // ---------- spelling fixes (photo-OCR and typos), shown to the user as "read as …" ----------
+  // Only exact knowledge-base names are candidates. Two kinds of fix: the same letters with different spacing
+  // ("isopropyl pal mitate"), or one typo (two on names of 16+ letters) when the closest name is unique and the
+  // numbers match exactly, so "Benzophenone-2" never becomes "Benzophenone-3".
+  let SQUASHED = null;
+  const squash = s => s.replace(/[^a-z0-9]/g, "");
+  const digits = s => s.replace(/[^0-9]/g, "");
+  function within(a, b, max) { // Levenshtein distance ≤ max (bounded)
+    if (Math.abs(a.length - b.length) > max) return false;
+    let prev = Array.from({ length: b.length + 1 }, (_, j) => j);
+    for (let i = 1; i <= a.length; i++) {
+      const cur = [i]; let best = i;
+      for (let j = 1; j <= b.length; j++) {
+        cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+        if (cur[j] < best) best = cur[j];
+      }
+      if (best > max) return false;
+      prev = cur;
+    }
+    return prev[b.length] <= max;
+  }
+  /** @returns {string|null} the knowledge-base name (key) the misspelling was read as */
+  function spellFix(k) {
+    const sq = squash(k);
+    if (sq.length < 8) return null;
+    if (!SQUASHED) SQUASHED = Object.keys(KB).map(x => [x, squash(x)]).filter(x => x[1].length >= 6);
+    for (const [kk, s] of SQUASHED) if (s === sq) return kk;
+    const max = sq.length >= 16 ? 2 : sq.length >= 10 ? 1 : 0;
+    for (let d = 1; d <= max; d++) {
+      const hits = SQUASHED.filter(([, s]) => digits(s) === digits(sq) && within(sq, s, d) && !within(sq, s, d - 1));
+      const entries = hits.map(([kk]) => KB[kk]).filter((e, i, a) => a.indexOf(e) === i);
+      if (entries.length === 1) return hits[0][0];
+      if (entries.length > 1) return null; // ambiguous: don't guess
     }
     return null;
   }
@@ -326,21 +462,36 @@
     const k2 = key(String(name).replace(MARKETING, " "));
     return KB[k2] || null;
   }
+  /** Exact name → pattern → spelling fix. A spelling fix comes back as a copy with readAs set. */
   function lookup(name) {
     if (!name) return null;
     const e = exact(name);
     if (e) return e;
-    const k = key(String(name).replace(MARKETING, " "));
-    return k ? patternEntry(k, String(name).trim()) : null;
+    let k = key(String(name).replace(MARKETING, " "));
+    if (!k) return null;
+    if (/ hcl$/.test(k) && KB[k.slice(0, -4)]) return KB[k.slice(0, -4)];     // "Pyridoxine HCl"
+    k = k.replace(/^c[l1i]?\s?(\d{5})$/, "ci $1")                             // OCR'd "C 14720", "Cl 61570"
+      .replace(/^pol[iy] ?qu?a ?ter ?ni ?um\b/, "polyquaternium");              // "Poliquaternium-10", "Polyquaterni um 6"
+    if (KB[k]) return KB[k];
+    const p = patternEntry(k, String(name).trim());
+    if (p) return p;
+    const f = spellFix(k);
+    return f ? Object.assign({}, KB[f], { readAs: titleCase(f) }) : null;
   }
-  // Whole name first (keeps Caprylic/Capric Triglyceride whole); then "Water/Aqua/Eau" style slashes when every part is the same thing.
+  // Whole name first (keeps Caprylic/Capric Triglyceride whole); then slashes: "Water/Aqua/Eau" (all the same thing),
+  // "CI 19140/Yellow 5" (all colors or all neutral), or a bilingual "Hyaluronic Acid/Acide Hyaluronique".
+  const FRENCH = /[éèêàçôû]|\b(acide|huile|beurre|cire|alcool|extrait|eau|sel|glycerine|parfum|marin)\b/i;
   function resolveName(name, exactOnly) {
     const e = exactOnly ? exact(name) : lookup(name);
     if (e) return e;
     if (name.includes("/")) {
       const parts = name.split("/").map(s => s.trim()).filter(Boolean);
       const hits = parts.map(p => exactOnly ? exact(p) : lookup(p));
-      if (hits.length > 1 && hits.every(Boolean) && hits.every(h => h.id === hits[0].id)) return hits[0];
+      if (hits.length > 1 && hits.every(Boolean)) {
+        if (hits.every(h => h.id === hits[0].id)) return hits[0];
+        if (hits.every(h => h.group === hits[0].group && (h.group === "dye" || h.group === "neutral"))) return hits[0];
+      }
+      if (parts.length === 2 && hits[0] && !hits[0].readAs && !hits[1] && FRENCH.test(parts[1])) return hits[0];
     }
     return null;
   }
@@ -358,7 +509,9 @@
       const c = s[i];
       if (c === "(" || c === "[") depth++;
       else if ((c === ")" || c === "]") && depth) depth--;
-      if (c === "," && depth === 0 && !(/\d/.test(s[i - 1] || "") && /\d/.test(s[i + 1] || ""))) { out.push(cur); cur = ""; continue; }
+      // Not inside "1,2-Hexanediol" or "1, 2-Hexanediol"
+      const inName = /\d/.test(s[i - 1] || "") && (/\d/.test(s[i + 1] || "") || (/(^|[\s(])\d$/.test(cur) && /^\s\d+\s?-/.test(s.slice(i + 1))));
+      if (c === "," && depth === 0 && !inName) { out.push(cur); cur = ""; continue; }
       cur += c;
     }
     out.push(cur);
@@ -420,6 +573,9 @@
   function parse(text) {
     const src = String(text || "");
     let t = src.replace(/\r\n?|\n|\t| /g, " ");
+    t = t.replace(/&quot;?|&#34;/g, '"').replace(/&amp;/g, "&").replace(/&gt;?/g, " ").replace(/&lt;?/g, " ").replace(/&#39;|&apos;/g, "'").replace(/&nbsp;/g, " ")
+      .replace(/\[/g, "(").replace(/\]/g, ")")                        // "Aqua [Water]" reads like "Aqua (Water)"
+      .replace(/may\s+contain\s*\/\s*peut\s+contenir/gi, "may contain");
     const truncated = /…|\.\.\.|\band (many )?other ingredients\b|\bsee (the )?(package|packaging|label|box|bottle|carton|container|product)\b|\betc\b\.?/i.test(t);
     const hasHundred = /\b100\s*%/.test(t);
     // The truncation phrases themselves aren't ingredients ("Fragrance and other ingredients" → "Fragrance").
@@ -449,7 +605,7 @@
       heads.forEach((h, i) => sections.push({ type: h.type, text: t.slice(h.end, i + 1 < heads.length ? heads[i + 1].start : t.length) }));
     }
 
-    const items = []; let pos = 0, rank = 0;
+    const items = [], pieces = []; let pos = 0, rank = 0;
     let hasActives = false, hasInactives = false;
     for (const sec of sections) {
       if (sec.type === "active") hasActives = true;
@@ -458,7 +614,12 @@
       s = s.replace(/\(\s*(?:[a-z]|[ivx]{1,3}|\d)\s*\)/gi, " ").replace(/[*†‡^°]/g, " "); // footnote markers: "Oil(a)*"
       const may = sec.type === "may";
       const active = sec.type === "active";
-      for (let piece of splitTop(s, false)) {
+      splitTop(s, false).forEach((piece, n) => {
+        // A leading label we don't know ("Ingredientes: Aqua", "Base contains: Aqua") ends at its colon.
+        if (n === 0 && /:/.test(piece)) piece = piece.slice(piece.lastIndexOf(":") + 1);
+        pieces.push(piece);
+      });
+      for (let piece of pieces.splice(0)) {
         piece = piece.replace(/^(and|&)\s+/i, "").replace(/\s*\.$/, "").trim();
         if (!piece) continue;
         let pct = null;
@@ -503,11 +664,15 @@
     }
     const head = clean(piece.slice(0, p.start)), after = clean(piece.slice(p.end + 1)), inner = clean(p.inner);
     const outer = clean(head + " " + after);
-    const innerParts = splitTop(inner, true);
+    let innerParts = splitTop(inner, true);
+    // "Iron Oxides (CI 77491, 77492, 77499)": bare numbers next to a CI number are CI numbers too.
+    if (innerParts.some(x => /^ci\s?\d{5}$/i.test(x))) innerParts = innerParts.map(x => /^\d{5}$/.test(x) ? "CI " + x : x);
     if (innerParts.length > 1) {
       const headHit = outer ? resolveName(outer, false) : null;
       const innerItems = innerParts.flatMap(x => resolvePiece(x));
-      if (headHit && innerItems.length && innerItems.every(x => x.entry && x.entry.id === headHit.id)) return [{ name: clean(piece), entry: headHit }];
+      // Aliases of the head ("Aqua (Water, Eau)"), or the shades of a color or pigment: one ingredient.
+      const same = x => x.entry && (x.entry.id === headHit.id || (x.entry.group === headHit.group && (headHit.group === "dye" || (headHit.group === "neutral" && x.entry.tags.indexOf("pigment") >= 0))));
+      if (headHit && innerItems.length && innerItems.every(same)) return [{ name: clean(piece), entry: headHit }];
       const out = /** @type {any} */ ([...(headHit ? [{ name: outer, entry: headHit }] : []), ...innerItems]);
       out.sub = true;
       return out;

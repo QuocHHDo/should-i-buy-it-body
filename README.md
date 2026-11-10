@@ -139,9 +139,22 @@ The parser:
 - Treats "A or B", "and/or" and "Et/Ou" as alternatives.
 - Keeps "Caprylic/Capric Triglyceride" whole while merging "Water/Aqua/Eau".
 - Handles "May contain (+/-):".
-- Leaves "D&C Green No. 8", "1,2-Hexanediol" and "Alcohol Denat." intact.
-- Resolves parenthesis aliases.
-- Strips "*", "organic", footnotes, batch codes and ", USP".
+- Leaves "D&C Green No. 8", "1,2-Hexanediol" (also "1, 2-Hexanediol") and "Alcohol Denat." intact.
+- Resolves parenthesis aliases, including "Aqua [Water]" and "Iron Oxides (CI 77491, 77492, 77499)".
+- Strips "*", "organic", footnotes, batch codes, ", USP", HTML entities and foreign headings ("Ingredientes:", "May contain/Peut contenir").
+- Reads color and bilingual slash names: "CI 19140/Yellow 5", "Hyaluronic Acid/Acide Hyaluronique".
+
+**Spelling fixes.** Lists photographed from a bottle often come back with OCR errors, and the fixer reads two kinds:
+- Words split by spaces ("Isopropyl Pal Mitate").
+- One typo, or two on names of 16+ letters ("Steraryl Alcohol", "Pyridoxine HCI", "C 14720").
+
+The fixer only matches exact knowledge-base names. It never accepts a match when the numbers differ ("Benzophenone-2" stays unknown) or when two names are equally close. Every fix is shown on the card ("read as Stearyl Alcohol"), so you can check it against the bottle.
+
+**Coverage.** Checked against 822 real ingredient lists from Open Beauty Facts on 2026-11-09:
+- Unknowns fell from 13.1% of ingredients to 3.6% of plausible ingredient names.
+- Fully understood lists rose from 23% to 64%.
+- Every name seen three or more times is now recognized. `tests/coverage.test.js` keeps it that way, using those 794 names and their counts in `tests/fixtures/common-ingredients.json` (names only, credited to Open Beauty Facts, ODbL).
+- Most of what's left is OCR debris, such as addresses, marketing text and merged words, rather than real ingredients.
 
 ## Built-in products
 
@@ -235,7 +248,7 @@ Every `js/` file is UMD, so it works in the browser and under `require` in Node.
 
 ```sh
 python -m http.server 8000      # or any static server; open http://localhost:8000
-node tests/run.js               # parser, lookups, every rule, products, determinism
+node tests/run.js               # parser, lookups, every rule, products, coverage, determinism
 node scripts/build-single.mjs body-care.html
 ```
 
