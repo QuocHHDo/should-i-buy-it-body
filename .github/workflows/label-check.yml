@@ -1,0 +1,32 @@
+# Once a month (and on demand from the Actions tab), re-checks every built-in ingredient list against its public
+# source page. If a list changed or a page couldn't be checked, it opens one "label-check" issue, or comments on the
+# open one. Nothing is changed automatically: a person copies the new list in.
+name: Monthly label check
+on:
+  schedule:
+    - cron: "17 9 1 * *"
+  workflow_dispatch:
+permissions:
+  contents: read
+  issues: write
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - id: check
+        run: node scripts/check-labels.js --report label-report.md
+      - if: steps.check.outputs.attention == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh label create label-check --color 2f5d78 --description "Monthly check of built-in ingredient lists" 2>/dev/null || true
+          n=$(gh issue list --label label-check --state open --json number --jq '.[0].number')
+          if [ -n "$n" ]; then
+            gh issue comment "$n" --body-file label-report.md
+          else
+            gh issue create --title "Label check: built-in ingredient lists need a look" --label label-check --body-file label-report.md
+          fi

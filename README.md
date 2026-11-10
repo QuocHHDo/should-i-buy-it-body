@@ -248,6 +248,8 @@ Both use a 9-second timeout. US coverage is thin, so every miss, missing list or
 | `sw.js`, `manifest.webmanifest`, `icons/` | Offline and install |
 | `tests/` | `node tests/run.js` (Node's built-in test runner, no dependencies) |
 | `scripts/build-single.mjs` | Inlines the JS into one HTML file |
+| `scripts/check-labels.js` | Re-checks every built-in list against its source page |
+| `.github/workflows/` | Tests on every push; the monthly label check |
 
 Every `js/` file is UMD, so it works in the browser and under `require` in Node.
 
@@ -257,7 +259,17 @@ Every `js/` file is UMD, so it works in the browser and under `require` in Node.
 python -m http.server 8000      # or any static server; open http://localhost:8000
 node tests/run.js               # parser, lookups, every rule, products, coverage, determinism
 node scripts/build-single.mjs body-care.html
+node scripts/check-labels.js    # compare the built-in lists with their source pages (about 3 minutes)
 ```
+
+## Keeping the lists current
+
+- **Tests** run on GitHub Actions on every push and pull request.
+- **Monthly label check:** on the 1st of each month, and on demand from the Actions tab, `scripts/check-labels.js` re-fetches each built-in's source page.
+  - It compares the list ingredient by ingredient, so spacing and punctuation don't count.
+  - If a list changed, it opens one `label-check` issue (or comments on the open one) listing what was added, removed or reordered, with the new list.
+  - Pages it couldn't reach are listed separately and aren't treated as changes.
+  - Nothing is updated automatically. Copy the new list into `js/products.js`, update `checked`, and run the tests.
 
 ## Deploy
 
