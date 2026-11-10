@@ -2,7 +2,7 @@
 // the cache and refreshed in the background, so the app opens with no signal and still picks up updates.
 // The barcode library (375 KB) is not precached: scanning needs a connection anyway, and it is cached on first use.
 // Open Beauty Facts calls always go to the network.
-const CACHE = "body-care-v2";
+const CACHE = "body-care-v3";
 const SHELL = [
   "./",
   "index.html",

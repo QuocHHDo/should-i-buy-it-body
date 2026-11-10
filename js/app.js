@@ -14,7 +14,8 @@
   };
   const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
   const monthYear = d => { const m = /^(\d{4})-(\d{2})/.exec(d || ""); return m ? MONTHS[+m[2] - 1] + " " + m[1] : ""; };
-  const label = p => ((p.brand ? p.brand + " " : "") + p.name).trim();
+  // "Cetaphil Moisturizing Cream", not "Cetaphil Cetaphil Moisturizing Cream" when the name already starts with the brand.
+  const label = p => ((p.brand && !String(p.name).toLowerCase().startsWith(p.brand.toLowerCase()) ? p.brand + " " : "") + p.name).trim();
   const CAT_ORDER = Object.keys(V.CATEGORIES);
 
   let profile = V.normalizeProfile(store.get("body.profile", null) || {});
@@ -155,6 +156,7 @@
           </div>
         </div>
         <p class="src">${sourceLine(p)}</p>
+        ${matchHTML(p)}
       </div>
       <div class="result">
         <div class="col">${flagsHTML(r)}${verdictHTML(r)}${whyHTML(r)}${notesHTML(r)}${betterHTML(p, r)}</div>
@@ -366,7 +368,7 @@
     if (!res) obf = `<p class="thinking"><span class="dot"></span>Searching Open Beauty Facts…</p>`;
     else if (res.status === "error") obf = `<p class="muted">${esc(res.message)}</p>`;
     else if (!res.products.length) obf = `<p class="muted">No match in Open Beauty Facts.</p>`;
-    else obf = `<ul class="results">${res.products.map((p, i) => `<li><button type="button" data-obf="${i}"><span>${esc(label(p))}</span><small>${p.ingredients ? esc(p.category) : "no ingredient list"}</small></button></li>`).join("")}</ul>`;
+    else obf = `<ul class="results">${res.products.map((p, i) => { const m = Src.matchBuiltin(p, PRODUCTS); return `<li><button type="button" data-obf="${i}"><span>${esc(label(p))}</span><small>${p.ingredients ? esc(p.category) : "no ingredient list"}</small></button>${m ? `<button type="button" class="matchlink" data-go="p=${esc(m.id)}">✓ Label-checked version: ${esc(label(m))}</button>` : ""}</li>`; }).join("")}</ul>`;
     return `<section class="panel" aria-label="Search results"><div class="row" style="justify-content:space-between"><h2>Results for “${esc(q)}”</h2><button class="linkbtn" type="button" data-close>Close</button></div>
       ${loc}<h3>Open Beauty Facts <span class="muted" style="font-weight:400">(community data)</span></h3>${obf}
       <p class="muted" style="margin:0">Not here? <button class="linkbtn" type="button" data-act="paste">Paste the ingredient list</button>.</p></section>`;
@@ -381,17 +383,25 @@
   function openObf(p) {
     if (!p) return;
     if (p.ingredients) go("i=" + encodeProduct(p, null));
-    else openPaste({ name: label(p), category: p.category, msg: "Open Beauty Facts has “" + label(p) + "” but no ingredient list. Copy it from the bottle or the brand's site and paste it here." });
+    else openPaste({ name: label(p), category: p.category, match: Src.matchBuiltin(p, PRODUCTS), msg: "Open Beauty Facts has “" + label(p) + "” but no ingredient list. Copy it from the bottle or the brand's site and paste it here." });
+  }
+  // On an Open Beauty Facts card: offer the label-checked built-in when the name matches one. Never swapped automatically.
+  function matchHTML(p) {
+    if (p.source !== "Open Beauty Facts") return "";
+    const m = Src.matchBuiltin(p, PRODUCTS);
+    return m ? `<div class="matchbox"><p><b>We've label-checked ${esc(label(m))}.</b> It looks like the same product; compare the name and size with your bottle.</p><button class="btn small accent" type="button" data-go="p=${esc(m.id)}">Open the label-checked version</button></div>` : "";
   }
 
   // ---------- barcode ----------
   async function lookupBarcode(code) {
     const clean = String(code || "").replace(/\D/g, "");
+    const own = Src.builtinByBarcode(clean, PRODUCTS); // offline and instant
+    if (own) { $("lookup").innerHTML = ""; go("p=" + own.id); toast("Barcode matched a label-checked product"); return; }
     $("lookup").innerHTML = `<section class="panel"><p class="thinking" style="margin:0"><span class="dot"></span>Looking up barcode ${esc(clean)}…</p></section>`;
     const res = await Src.byBarcode(clean);
     if (res.status === "found") { $("lookup").innerHTML = ""; go("i=" + encodeProduct(res.product, null)); return; }
     $("lookup").innerHTML = "";
-    if (res.status === "no-ingredients") openPaste({ name: label(res.product), category: res.product.category, msg: "Open Beauty Facts has this product but no ingredient list. Paste it from the bottle or the brand's site." });
+    if (res.status === "no-ingredients") openPaste({ name: label(res.product), category: res.product.category, match: Src.matchBuiltin(res.product, PRODUCTS), msg: "Open Beauty Facts has this product but no ingredient list. Paste it from the bottle or the brand's site." });
     else if (res.status === "not-found") openPaste({ msg: "Barcode " + clean + " isn't in Open Beauty Facts yet (its US coverage is thin). Paste the ingredient list from the bottle." });
     else openPaste({ msg: (res.message || "The lookup failed.") + " Paste the ingredient list from the bottle instead." });
   }
@@ -411,6 +421,8 @@
     $("pasteTitle").textContent = o.title || "Paste an ingredient list";
     $("pasteMsg").textContent = o.msg || "Copy the full list from the bottle or the brand's site. Drug Facts lists (Active and Inactive ingredients) work too.";
     $("pasteMsg").className = o.msg ? "notice warn" : "muted";
+    $("pasteMatch").hidden = !o.match;
+    if (o.match) $("pasteMatch").innerHTML = `<p style="margin:0">We've label-checked <b>${esc(label(o.match))}</b>, which looks like this product.</p><button class="btn small accent" type="button" data-go="p=${esc(o.match.id)}">Open the label-checked version</button>`;
     if (o.name != null) $("pName").value = o.name;
     if (o.category) $("pCat").value = o.category;
     if (o.text != null) $("pText").value = o.text;
@@ -419,6 +431,7 @@
     $("pText").focus();
   }
   function closePaste() { $("pasteBox").hidden = true; $("pasteToggle").setAttribute("aria-expanded", "false"); }
+  $("pasteMatch").addEventListener("click", e => { const b = e.target.closest("[data-go]"); if (b) { closePaste(); go(b.dataset.go); } });
   $("pasteToggle").addEventListener("click", () => { if ($("pasteBox").hidden) openPaste({}); else closePaste(); });
   $("pasteCancel").addEventListener("click", closePaste);
   $("pasteBox").addEventListener("submit", e => {

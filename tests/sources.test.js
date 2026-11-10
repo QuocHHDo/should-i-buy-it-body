@@ -35,6 +35,31 @@ test("lookups use the documented endpoints, fields and a 9-second timeout", asyn
   assert.equal(S.TIMEOUT_MS, 9000);
 });
 
+test("a looked-up product is matched to a label-checked built-in only when brand and distinctive words agree", () => {
+  const { PRODUCTS } = require("../js/products.js");
+  const m = (name, brand) => { const r = S.matchBuiltin({ name, brand }, PRODUCTS); return r && r.id; };
+  assert.equal(m("Head & Shoulders Classic Clean", "Procter & Gamble, Head & Shoulders"), "head-shoulders-classic-clean");
+  assert.equal(m("Classic Clean 2in1 Shampoo + Conditioner", "Head & Shoulders"), null);   // a different product
+  assert.equal(m("Pro-V Daily Moisture Renewal 2 in 1", "Pantene"), "pantene-daily-moisture-2in1");
+  assert.equal(m("Pro-V Daily Moisture Renewal Shampoo", "Pantene"), null);              // we don't have the plain shampoo
+  assert.equal(m("Ultra Sheer Dry-Touch Sunscreen SPF 70", "Neutrogena"), null);         // different SPF, different formula
+  assert.equal(m("Hydro Boost Fragrance Free Gel Cream", "Neutrogena"), "neutrogena-hydro-boost-fragrance-free");
+  assert.equal(m("Hydro Boost Water Gel", "Neutrogena"), "neutrogena-hydro-boost-water-gel");
+  assert.equal(m("Deodorant Cucumber & Mint", "Native"), null);                          // different scent
+  assert.equal(m("Moisturizing Cream for Normal to Dry Skin", "CeraVe"), "cerave-moisturizing-cream");
+  assert.equal(m("Baby Moisturizing Cream", "CeraVe"), null);
+  assert.equal(m("Bedtime Baby Lotion", "Johnson's"), null);                              // a different lotion
+  assert.equal(m("Baby Lotion 500 ml", "Johnson's"), "johnsons-baby-lotion");
+  assert.equal(m("Moisturizing Cream", "Some Other Brand"), null);
+});
+
+test("built-in barcodes match UPC-A and EAN-13 forms of the same code", () => {
+  const catalog = [{ id: "x", barcodes: ["037000862246"] }];
+  assert.equal(S.builtinByBarcode("0037000862246", catalog).id, "x");
+  assert.equal(S.builtinByBarcode("37000862246", catalog).id, "x");
+  assert.equal(S.builtinByBarcode("037000862247", catalog), null);
+});
+
 test("category guesses", () => {
   assert.equal(S.guessCategory(["en:shampoos"], ""), "Shampoo");
   assert.equal(S.guessCategory(["en:hair-conditioners"], ""), "Conditioner");

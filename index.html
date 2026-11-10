@@ -196,6 +196,9 @@ h1 .kind { font-size: .5em; font-stretch: 85%; font-weight: 800; letter-spacing:
 .swap { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 10px; align-items: center; text-align: left; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; cursor: pointer; }
 .swap .sn { font-weight: 600; } .swap .sd { grid-column: 1 / -1; font-size: 13px; color: var(--muted); }
 .actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.matchbox { border: 1.5px solid var(--good); background: var(--good-soft); border-radius: 12px; padding: 10px 12px; display: grid; gap: 8px; justify-items: start; }
+.matchbox p { margin: 0; font-size: 14px; }
+.matchlink { margin-top: 4px; font: 600 13px var(--font-body); color: var(--good); background: var(--good-soft); border: 1px solid var(--good); border-radius: 8px; padding: 6px 10px; cursor: pointer; text-align: left; }
 .incbox { border: 2px solid var(--mid); background: var(--mid-soft); border-radius: 12px; padding: 12px 14px; display: grid; gap: 8px; }
 .incbox p { margin: 0; }
 
@@ -294,6 +297,7 @@ body:not([data-view="check"]) .search, body:not([data-view="check"]) #lookup { d
     <form class="panel" id="pasteBox" hidden autocomplete="off">
       <h2 id="pasteTitle">Paste an ingredient list</h2>
       <p class="muted" id="pasteMsg" style="margin:0">Copy the full list from the bottle or the brand's site. Drug Facts lists (Active and Inactive ingredients) work too.</p>
+      <div class="matchbox" id="pasteMatch" hidden></div>
       <div class="pgrid2">
         <label class="field">Product name<input id="pName" type="text" maxlength="140" placeholder="e.g. Brand Daily Body Wash"></label>
         <label class="field">Type<select id="pCat"></select></label>

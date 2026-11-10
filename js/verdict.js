@@ -333,7 +333,7 @@
   }
 
   // ---------- Compare ----------
-  const display = p => ((p.brand ? p.brand + " " : "") + p.name).trim();
+  const display = p => ((p.brand && !String(p.name).toLowerCase().startsWith(p.brand.toLowerCase()) ? p.brand + " " : "") + p.name).trim();
   function compare(a, b, profile) {
     const ra = evaluate(a, profile), rb = evaluate(b, profile);
     const na = display(a), nb = display(b);

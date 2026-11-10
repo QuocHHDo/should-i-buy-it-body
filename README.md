@@ -227,6 +227,13 @@ These could be added once a clean list is found on the brand's site.
 
 Both use a 9-second timeout. US coverage is thin, so every miss, missing list or failure opens the paste box.
 
+**Finding the label-checked version.** A scan tries two things before relying on Open Beauty Facts data:
+1. **Built-in barcodes, checked first, instantly and offline.** A built-in carries a barcode only when its Open Beauty Facts entry matches by brand and name, and that entry's ingredient list overlaps the store-copied list by at least 75%. A barcode only covers one size, and the store pages don't show barcodes, so most built-ins don't have one.
+2. **Name matching.** When a scanned or searched product's brand and distinctive name words match a built-in, the card, the paste box and the search results offer "Open the label-checked version", with a reminder to compare the name and size.
+   - Distinctive words are things like "Classic Clean", "Citrus & Herbal Musk" or "SPF 55".
+   - A conflicting word such as "2-in-1", "kids", "sport", "fragrance free" or a different SPF rules the match out.
+   - The app never switches products on its own.
+
 ## Files
 
 | File | What it does |

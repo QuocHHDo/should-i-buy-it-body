@@ -22,6 +22,20 @@ test("every built-in has an https source URL, a source name and a valid checked 
   }
 });
 
+test("built-in barcodes are valid manufacturer codes and each belongs to one product", () => {
+  const valid = c => { const d = c.split("").map(Number), check = d.pop(); const s = d.reverse().reduce((t, x, i) => t + x * (i % 2 === 0 ? 3 : 1), 0); return (10 - s % 10) % 10 === check; };
+  const seen = new Set();
+  for (const p of PRODUCTS) for (const c of p.barcodes || []) {
+    assert.match(c, /^(\d{8}|\d{12}|\d{13})$/, p.id + " " + c);
+    assert.ok(valid(c), p.id + " check digit " + c);
+    assert.ok(!(c.length === 13 && c[0] === "2"), p.id + " in-store code " + c);
+    const k = c.replace(/^0+/, "");
+    assert.ok(!seen.has(k), "duplicate " + c);
+    seen.add(k);
+  }
+  assert.ok(seen.size >= 10);
+});
+
 test("ids are unique, categories are known, and nothing is a made-up example", () => {
   const ids = PRODUCTS.map(p => p.id);
   assert.equal(new Set(ids).size, ids.length);
